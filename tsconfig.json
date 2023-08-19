@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": false,
+    "outDir": "./dist",
+    "target": "ES2018",
+    "module": "commonjs",
+    "baseUrl": "./",
+    "skipLibCheck": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@lib/*": ["lib/*"]
+    }
+  },
+  "include": ["./lib"]
+}

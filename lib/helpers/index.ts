@@ -1,0 +1,1 @@
+export { getModuleScope } from "./getScopeModule";
