@@ -31,7 +31,8 @@ const traverseUpToFindTranslationHookSpecifierCall = (context) => {
 };
 
 const isConstantCase = (string) => {
-  return constantCase(string) === string;
+  const namespaceStringArray = string.split(".");
+  return namespaceStringArray.every((s) => constantCase(s) === s);
 };
 
 const rule: Rule.RuleModule = {
@@ -95,10 +96,12 @@ const rule: Rule.RuleModule = {
               {
                 messageId: "constantCase",
                 fix: (fixer) => {
-                  const fixed = constantCase(
-                    (node.arguments?.[0] as unknown as types.StringLiteral)
-                      ?.value
-                  );
+                  const fixed = (
+                    node.arguments?.[0] as unknown as types.StringLiteral
+                  )?.value
+                    .split(".")
+                    .map((v) => constantCase(v))
+                    .join(".");
                   return fixer.replaceText(node.arguments[0], fixed);
                 },
               },
