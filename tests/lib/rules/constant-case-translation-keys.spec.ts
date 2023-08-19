@@ -38,6 +38,18 @@ ruleTester.run("constant-case-translation-keys", rule, {
       `,
     },
     {
+      options: [{ translationHookName: "useTrs" }],
+      code: `
+        import {useTrs} from "react-i18next";
+
+        export const Component = () => {
+
+          const {t} = useTrs();
+          return <div>{t("CONSTANT_CASE_KEY")}</div>
+        };
+      `,
+    },
+    {
       code: `
         import {useTranslation} from "react-i18next";
 
@@ -130,6 +142,46 @@ ruleTester.run("constant-case-translation-keys", rule, {
 
           const ut = useTranslation();
           return <div>{ut.t("namespace.camelCaseKey")}</div>
+        };
+      `,
+      errors: [{ message: ERROR_MESSAGE, type: "Literal" }],
+    },
+    {
+      options: [{ translationHookName: "useTrs" }],
+      code: `
+        import {useTrs} from "react-i18next";
+
+        export const Component = () => {
+
+          const {t} = useTrs();
+          return <div>{t("camelCaseKey")}</div>
+        };
+      `,
+      errors: [{ message: ERROR_MESSAGE, type: "Literal" }],
+    },
+    {
+      options: [{ translationHookName: "useTrs" }],
+      code: `
+        import {useTrs} from "react-i18next";
+
+        export const Component = () => {
+
+          const {t} = useTrs();
+          return <div>{t("namespace.camelCaseKey")}</div>
+        };
+      `,
+      errors: [{ message: ERROR_MESSAGE, type: "Literal" }],
+    },
+
+    {
+      options: [{ translationHookName: "useTrs" }],
+      code: `
+        import {useTrs} from "react-i18next";
+
+        export const Component = () => {
+
+          const trs = useTrs();
+          return <div>{trs.t("namespace.camelCaseKey")}</div>
         };
       `,
       errors: [{ message: ERROR_MESSAGE, type: "Literal" }],

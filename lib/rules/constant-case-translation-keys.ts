@@ -9,16 +9,15 @@ const DEFAULT_TRANSLATION_HOOK_NAME = "useTranslation";
 export const ERROR_MESSAGE = "Translation key must be in CONSTANT_CASE";
 
 const traverseUpToFindTranslationHookSpecifierCall = (
-  context: Rule.RuleContext
+  context: Rule.RuleContext,
+  hookName
 ) => {
   let scope = context.getScope();
   let result;
   while (scope.type !== "module") {
     const refs = scope.references;
     if (refs.length) {
-      const callRef = refs.find(
-        (r) => r.identifier.name === DEFAULT_TRANSLATION_HOOK_NAME
-      );
+      const callRef = refs.find((r) => r.identifier.name === hookName);
 
       if (callRef) {
         result = callRef;
@@ -45,21 +44,30 @@ const rule: Rule.RuleModule = {
     messages: {
       [MESSAGE_ID]: ERROR_MESSAGE,
     },
+    schema: [
+      {
+        type: "object",
+        properties: {
+          translationHookName: { type: "string" },
+        },
+        additionalProperties: false,
+      },
+    ],
   },
   create(context) {
+    const hookName =
+      context.options[0]?.translationHookName || DEFAULT_TRANSLATION_HOOK_NAME;
     return {
       CallExpression(node) {
         const moduleScope = getModuleScope(context);
 
         if (!moduleScope) return;
 
-        const translationHookSpecifier = moduleScope.set.get(
-          DEFAULT_TRANSLATION_HOOK_NAME
-        );
+        const translationHookSpecifier = moduleScope.set.get(hookName);
         if (!translationHookSpecifier) return;
 
         const translationHookSpecifierCall =
-          traverseUpToFindTranslationHookSpecifierCall(context);
+          traverseUpToFindTranslationHookSpecifierCall(context, hookName);
 
         // translation hook might be imported but not used;
         if (!translationHookSpecifierCall) return;
