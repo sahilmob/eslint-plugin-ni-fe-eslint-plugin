@@ -32,8 +32,54 @@ ruleTester.run("constant-case-translation-keys", rule, {
 
         export const Component = () => {
 
-          const {t} = useTranslation();          
+          const {t} = useTranslation();
           return <div>{t("CONSTANT_CASE_KEY")}</div>
+        };
+      `,
+    },
+    {
+      code: `
+        import {useTranslation} from "react-i18next";
+
+        export const Component = () => {
+
+          const {t} = useTranslation();
+          return <div>{t("NAMESPACE.CONSTANT_CASE_KEY")}</div>
+        };
+      `,
+    },
+    {
+      code: `
+        import {useTranslation} from "react-i18next";
+
+        const translationKey = "CONSTANT_CASE_KEY"; 
+
+        export const Component = () => {
+
+          const {t} = useTranslation();          
+          return <div>{t(translationKey)}</div>
+        };
+      `,
+    },
+    {
+      code: `
+        import {useTranslation as useT} from "react-i18next";
+
+        export const Component = () => {
+
+          const {t} = useT();
+          return <div>{t("NAMESPACE.CONSTANT_CASE_KEY")}</div>
+        };
+      `,
+    },
+    {
+      code: `
+        import {useTranslation} from "react-i18next";
+
+        export const Component = () => {
+
+          const ut = useTranslation();
+          return <div>{ut.t("CONSTANT_CASE_KEY")}</div>
         };
       `,
     },
@@ -48,6 +94,42 @@ ruleTester.run("constant-case-translation-keys", rule, {
 
           const {t} = useTranslation();
           return <div>{t("camelCaseKey")}</div>
+        };
+      `,
+      errors: [{ message: ERROR_MESSAGE, type: "Literal" }],
+    },
+    {
+      code: `
+        import {useTranslation} from "react-i18next";
+
+        export const Component = () => {
+
+          const {t} = useTranslation();
+          return <div>{t("namespace.camelCaseKey")}</div>
+        };
+      `,
+      errors: [{ message: ERROR_MESSAGE, type: "Literal" }],
+    },
+    {
+      code: `
+        import {useTranslation} from "react-i18next";
+
+        export const Component = () => {
+
+          const ut = useTranslation();
+          return <div>{ut.t("camelCaseKey")}</div>
+        };
+      `,
+      errors: [{ message: ERROR_MESSAGE, type: "Literal" }],
+    },
+    {
+      code: `
+        import {useTranslation} from "react-i18next";
+
+        export const Component = () => {
+
+          const ut = useTranslation();
+          return <div>{ut.t("namespace.camelCaseKey")}</div>
         };
       `,
       errors: [{ message: ERROR_MESSAGE, type: "Literal" }],

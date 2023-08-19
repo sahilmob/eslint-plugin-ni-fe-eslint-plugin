@@ -4,11 +4,13 @@ import { constantCase } from "change-case";
 
 import { getModuleScope } from "../helpers";
 
+const MESSAGE_ID = "constantCase";
 const DEFAULT_TRANSLATION_HOOK_NAME = "useTranslation";
-
 export const ERROR_MESSAGE = "Translation key must be in CONSTANT_CASE";
 
-const traverseUpToFindTranslationHookSpecifierCall = (context) => {
+const traverseUpToFindTranslationHookSpecifierCall = (
+  context: Rule.RuleContext
+) => {
   let scope = context.getScope();
   let result;
   while (scope.type !== "module") {
@@ -31,8 +33,9 @@ const traverseUpToFindTranslationHookSpecifierCall = (context) => {
 };
 
 const isConstantCase = (string) => {
-  const namespaceStringArray = string.split(".");
-  return namespaceStringArray.every((s) => constantCase(s) === s);
+  if (!(typeof string === "string")) return true;
+
+  return string.split(".").every((s) => constantCase(s) === s);
 };
 
 const rule: Rule.RuleModule = {
@@ -40,7 +43,7 @@ const rule: Rule.RuleModule = {
     type: "problem",
     hasSuggestions: true,
     messages: {
-      constantCase: ERROR_MESSAGE,
+      [MESSAGE_ID]: ERROR_MESSAGE,
     },
   },
   create(context) {
@@ -94,7 +97,7 @@ const rule: Rule.RuleModule = {
             message: ERROR_MESSAGE,
             suggest: [
               {
-                messageId: "constantCase",
+                messageId: MESSAGE_ID,
                 fix: (fixer) => {
                   const fixed = (
                     node.arguments?.[0] as unknown as types.StringLiteral
@@ -108,7 +111,41 @@ const rule: Rule.RuleModule = {
             ],
           });
         } else if (types.isIdentifier(parentId)) {
-          // TODO: handle this case
+          // @ts-ignore
+          if (!types.isMemberExpression(node.callee)) return;
+          if (
+            !types.isIdentifier(
+              (node.callee as unknown as types.MemberExpression).object
+            ) ||
+            // @ts-ignore
+            (node.callee as unknown as types.MemberExpression).object.name !==
+              parentId.name
+          )
+            return;
+          if (
+            isConstantCase(
+              (node.arguments?.[0] as unknown as types.StringLiteral).value
+            )
+          )
+            return;
+          context.report({
+            node: node.arguments[0],
+            message: ERROR_MESSAGE,
+            suggest: [
+              {
+                messageId: MESSAGE_ID,
+                fix: (fixer) => {
+                  const fixed = (
+                    node.arguments?.[0] as unknown as types.StringLiteral
+                  )?.value
+                    .split(".")
+                    .map((v) => constantCase(v))
+                    .join(".");
+                  return fixer.replaceText(node.arguments[0], fixed);
+                },
+              },
+            ],
+          });
         }
       },
     };
