@@ -2,8 +2,7 @@
   "compilerOptions": {
     "strict": false,
     "outDir": "./dist",
-    "target": "ES2018",
-    "module": "commonjs",
+    "rootDir": "./lib",
     "baseUrl": "./",
     "skipLibCheck": true,
     "declaration": true,

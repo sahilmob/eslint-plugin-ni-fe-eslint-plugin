@@ -1,5 +1,9 @@
-import { Rule } from "eslint";
+/**
+ * @fileoverview This rule enforces constant case for translation keys.
+ * @author Sahil H. Mubaideen
+ */
 import { types } from "@babel/core";
+import { Rule, Scope } from "eslint";
 import { constantCase } from "change-case";
 
 import { getModuleScope } from "../helpers";
@@ -10,13 +14,13 @@ export const ERROR_MESSAGE = "Translation key must be in CONSTANT_CASE";
 
 const traverseUpToFindTranslationHookSpecifierCall = (
   context: Rule.RuleContext,
-  hookName
+  hookName: string
 ) => {
-  let scope = context.getScope();
+  let scope: Scope.Scope | null = context.getScope();
   let result;
-  while (scope.type !== "module") {
-    const refs = scope.references;
-    if (refs.length) {
+  while (scope?.type !== "module") {
+    const refs = scope?.references;
+    if (refs?.length) {
       const callRef = refs.find((r) => r.identifier.name === hookName);
 
       if (callRef) {
@@ -25,13 +29,13 @@ const traverseUpToFindTranslationHookSpecifierCall = (
       }
     }
 
-    scope = scope.upper;
+    scope = scope?.upper || null;
   }
 
   return result;
 };
 
-const isConstantCase = (string) => {
+const isConstantCase = (string: any) => {
   if (!(typeof string === "string")) return true;
 
   return string.split(".").every((s) => constantCase(s) === s);
@@ -79,7 +83,7 @@ const rule: Rule.RuleModule = {
           return;
 
         const parentId =
-          translationHookSpecifierCall.identifier?.parent?.parent?.id; // optch
+          translationHookSpecifierCall.identifier?.parent?.parent?.id;
 
         if (types.isObjectPattern(parentId)) {
           const nodeName = (node.callee as unknown as types.Identifier).name;
